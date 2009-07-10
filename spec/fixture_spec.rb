@@ -5,7 +5,7 @@ describe Rdmx::Fixture do
     @universe = ['red value', 'green value', 'blue value']
 
     @class = Class.new(Rdmx::Fixture) do
-      name_channels :red, :green, :blue
+      self.channels = :red, :green, :blue
     end
 
   end

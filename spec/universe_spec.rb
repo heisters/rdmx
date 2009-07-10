@@ -69,7 +69,7 @@ describe Rdmx::Universe do
     describe "fixtures" do
       before :each do
         @fixture_class = Class.new(Rdmx::Fixture) do
-          name_channels :channel1, :channel2
+          self.channels = :channel1, :channel2
         end
         @universe.fixtures.replace @fixture_class
       end

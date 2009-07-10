@@ -13,10 +13,9 @@ module Rdmx
     end
 
     class << self
-      attr_accessor :channels
-
-      def name_channels *names
-        self.channels = names
+      def channels; @channels; end
+      def channels= *names
+        @channels = names.flatten
 
         channels.each do |name|
           define_method "#{name}" do
