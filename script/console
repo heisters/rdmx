@@ -1,0 +1,3 @@
+#!/usr/bin/env ruby
+libs = " -r #{File.dirname(__FILE__)}/../rdmx"
+exec "/usr/bin/env irb #{libs}"
