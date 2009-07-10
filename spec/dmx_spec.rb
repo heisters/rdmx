@@ -1,15 +1,12 @@
 require File.dirname(__FILE__)+'/spec_helper'
 
 describe Rdmx::Dmx do
-  before :each do
-    @port = stub('SerialPort')
-    SerialPort.stub!(:new).and_return(@port)
-  end
-
-  it "should initialize a serial port object on the given device" do
-    SerialPort.should_receive(:new).with('/tmp/test',
-      {'baud' => 57600, 'data_bits' => 8, 'stop_bits' => 2, 'parity' => SerialPort::NONE})
-    Rdmx::Dmx.new('/tmp/test')
+  describe "initialization" do
+    it "should initialize a serial port object on the given device" do
+      SerialPort.should_receive(:new).with('/tmp/test',
+        {'baud' => 57600, 'data_bits' => 8, 'stop_bits' => 2, 'parity' => SerialPort::NONE})
+      Rdmx::Dmx.new('/tmp/test')
+    end
   end
 
   describe "packet construction" do
