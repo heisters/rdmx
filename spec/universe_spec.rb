@@ -19,16 +19,26 @@ describe Rdmx::Universe do
 
     it "should setup an empty set of fixtures" do
       u = Rdmx::Universe.new('/tmp/test')
-      u.fixtures.should have(Rdmx::Universe::NUM_CHANNELS).fixtures
+      u.should have(Rdmx::Universe::NUM_CHANNELS).fixtures
       u.fixtures.compact.should be_empty
     end
 
-    it "should setup a full set of fixtures if provided" do
-      @fixture_class = Class.new(Rdmx::Fixture) do
-        self.channels = :x, :y
+    describe "with fixtures" do
+      before :each do
+        @fixture_class = Class.new(Rdmx::Fixture) do
+          self.channels = :x, :y
+        end
       end
-      u = Rdmx::Universe.new('/tmp/test', @fixture_class)
-      u.fixtures.compact.should have(Rdmx::Universe::NUM_CHANNELS / 2).fixtures
+
+      it "should setup a full set of fixtures if provided" do
+        u = Rdmx::Universe.new('/tmp/test', @fixture_class)
+        u.should have(Rdmx::Universe::NUM_CHANNELS / 2).fixtures
+      end
+
+      it "should make it possible to limit the number of fixtures" do
+        u = Rdmx::Universe.new('/tmp/test', @fixture_class => 10)
+        u.should have(10).fixtures
+      end
     end
   end
 
@@ -83,7 +93,7 @@ describe Rdmx::Universe do
       end
 
       it "should be possible to fill the universe with fixtures" do
-        @universe.fixtures.compact.should have(Rdmx::Universe::NUM_CHANNELS / 2).fixtures
+        @universe.should have(Rdmx::Universe::NUM_CHANNELS / 2).fixtures
       end
 
       it "should correctly assign all the addresses" do
