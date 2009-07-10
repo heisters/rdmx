@@ -16,6 +16,12 @@ describe Rdmx::Universe do
       expect_write_with [0] * Rdmx::Universe::NUM_CHANNELS
       Rdmx::Universe.new('/tmp/test')
     end
+
+    it "should setup an empty set of fixtures" do
+      u = Rdmx::Universe.new('/tmp/test')
+      u.fixtures.should have(Rdmx::Universe::NUM_CHANNELS).fixtures
+      u.fixtures.compact.should be_empty
+    end
   end
 
   describe "with a dmx universe" do
@@ -57,6 +63,23 @@ describe Rdmx::Universe do
             @universe[2..5] = 128, 255
           end
         end
+      end
+    end
+
+    describe "fixtures" do
+      before :each do
+        @fixture_class = Class.new(Rdmx::Fixture) do
+          name_channels :channel1, :channel2
+        end
+        @universe.fixtures.replace @fixture_class
+      end
+
+      it "should be possible to fill the universe with fixtures" do
+        @universe.fixtures.compact.should have(Rdmx::Universe::NUM_CHANNELS / 2).fixtures
+      end
+
+      it "should correctly assign all the addresses" do
+        @universe.fixtures.map{|f|f.channels.values}.flatten.should == (0...512).to_a
       end
     end
   end
