@@ -12,8 +12,10 @@ module Rdmx
 
     def ramp range, duration, &step
       frames = duration * universe.fps
+      step_size = (range.end - range.begin).abs.to_f / frames.to_f
       frames.times do |frame|
-        step[(((range.last - range.first).to_f / frames.to_f) * frame).ceil]
+        value = range.begin < range.end ? (step_size * frame).ceil : (range.begin - (step_size * frame)).floor
+        step[value]
         sleep duration.to_f / universe.fps.to_f
       end
     end

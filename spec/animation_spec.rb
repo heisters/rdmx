@@ -24,7 +24,7 @@ describe Rdmx::Animation do
     end
   end
 
-  describe "a ramp with a start point" do
+  describe "a simple ramp" do
     before :each do
       @fade = Rdmx::Animation.new @universe do
         ramp 0..120, 10 do |value|
@@ -55,7 +55,35 @@ describe Rdmx::Animation do
     end
   end
 
-  describe "a ramp with a start point" do
-    it "should move slower on channels that are already part-way there"
+  describe "a negative ramp" do
+    before :each do
+      @fade = Rdmx::Animation.new @universe do
+        ramp 120..0, 10 do |value|
+          universe.fixtures[0..1].each{|f|f.all = value}
+        end
+      end
+      @fade.stub!(:sleep)
+    end
+
+    it "should set all fixtures to 120" do
+      @universe.fixtures[0..1].each do |f|
+        f.stub!(:all=)
+        f.should_receive(:all=).once.with(120)
+      end
+      @fade.go!
+    end
+
+    it "should execute the block based on the duration and the framerate" do
+      @universe.fixtures[0..1].each do |f|
+        f.should_receive(:all=).exactly(10 * @universe.fps).times
+      end
+      @fade.go!
+    end
+
+    it "should end with all fixtures at end" do
+      @fade.go!
+      @universe.fixtures[0..1].map{|f|f.all}.should == [[0, 0], [0, 0]]
+    end
   end
+
 end
