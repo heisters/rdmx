@@ -4,7 +4,9 @@ require 'rubygems'
 
 module Rdmx
 end
-require 'rdmx/dmx'
-require 'rdmx/universe'
-require 'rdmx/fixture'
-require 'rdmx/animation'
+%w(
+  rdmx/dmx
+  rdmx/universe
+  rdmx/fixture
+  rdmx/animation
+).each{|r|require File.dirname(__FILE__)+"/#{r}"}
