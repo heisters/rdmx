@@ -22,6 +22,14 @@ describe Rdmx::Universe do
       u.fixtures.should have(Rdmx::Universe::NUM_CHANNELS).fixtures
       u.fixtures.compact.should be_empty
     end
+
+    it "should setup a full set of fixtures if provided" do
+      @fixture_class = Class.new(Rdmx::Fixture) do
+        self.channels = :x, :y
+      end
+      u = Rdmx::Universe.new('/tmp/test', @fixture_class)
+      u.fixtures.compact.should have(Rdmx::Universe::NUM_CHANNELS / 2).fixtures
+    end
   end
 
   describe "with a dmx universe" do
@@ -69,7 +77,7 @@ describe Rdmx::Universe do
     describe "fixtures" do
       before :each do
         @fixture_class = Class.new(Rdmx::Fixture) do
-          self.channels = :channel1, :channel2
+          self.channels = :x, :y
         end
         @universe.fixtures.replace @fixture_class
       end

@@ -4,11 +4,11 @@ module Rdmx
 
     attr_accessor :dmx, :values, :fixtures
 
-    def initialize port
+    def initialize port, fixture_class=nil
       self.dmx = Rdmx::Dmx.new port
       self.values = Array.new NUM_CHANNELS
       self[0..-1] = 0 # set the universe to a known state
-      self.fixtures = FixtureArray.new self
+      self.fixtures = FixtureArray.new self, fixture_class
     end
 
     def []= channel, *new_values
@@ -27,17 +27,21 @@ module Rdmx
 
     class FixtureArray < Array
       attr_accessor :universe
-      def initialize universe, size=NUM_CHANNELS
-        newborn = super(size)
+
+      def initialize universe, fixture_class=nil
+        if fixture_class
+          address = -1
+          newborn = super(NUM_CHANNELS / fixture_class.channels.size) do
+            fixture_class.new universe, *fixture_class.channels.map{address+=1}
+          end
+        else
+          newborn = super(NUM_CHANNELS)
+        end
         newborn.universe = universe
       end
 
       def replace klass
-        address = -1
-        replacement = self.class.new(universe, NUM_CHANNELS / klass.channels.size) do |i|
-          klass.new universe, *klass.channels.map{address+=1}
-        end
-        super replacement
+        super self.class.new(universe, klass)
       end
     end
   end
