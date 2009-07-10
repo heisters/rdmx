@@ -26,6 +26,23 @@ describe Rdmx::Fixture do
       @fixture.green.should == 1
       @fixture.blue.should == 2
     end
+
+    it "should have an accessor for all channels" do
+      @fixture.all.should == [0, 1, 2]
+      @fixture.all = *%w(r g b)
+      @fixture.all.should == %w(r g b)
+    end
+
+    it "should raise an error if you try to set all channels without enough values" do
+      lambda do
+        @fixture.all = 'r', 'g'
+      end.should raise_error(ArgumentError)
+    end
+
+    it "should apply one value to all channels" do
+      @fixture.all = 'foo'
+      @fixture.all.should == %w(foo) * 3
+    end
   end
 
   describe "initializing" do

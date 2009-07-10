@@ -12,6 +12,21 @@ module Rdmx
       end
     end
 
+    def all
+      self.class.channels.map do |key| # preserve order!
+        self.channels[key]
+      end
+    end
+
+    def all= *values
+      values.flatten!
+      values = values * channels.size if values.size == 1
+      raise ArgumentError, "expected #{channels.size} values" unless values.size == channels.size
+      values.zip(self.class.channels).each do |value, key| # preserve order!
+        self.channels[key] = value
+      end
+    end
+
     class << self
       def channels; @channels; end
       def channels= *names
