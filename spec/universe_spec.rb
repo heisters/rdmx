@@ -48,6 +48,18 @@ describe Rdmx::Universe do
     end
 
     describe "controlling" do
+      it "should buffer writes and only write once" do
+        packet = Rdmx::Dmx.packetize(1, 255).join
+        @port.should_receive(:write).once.with(packet)
+        packet = Rdmx::Dmx.packetize(1).join
+        @port.should_not_receive(:write).with(packet)
+
+        @universe.buffer do
+          @universe[0] = 1
+          @universe[1] = 255
+        end
+      end
+
       describe "values" do
         describe "all" do
           it "should write a simple value to every channel" do
