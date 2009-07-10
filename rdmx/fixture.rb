@@ -14,7 +14,7 @@ module Rdmx
 
     def all
       self.class.channels.map do |key| # preserve order!
-        self.channels[key]
+        universe[channels[key]]
       end
     end
 
@@ -23,7 +23,7 @@ module Rdmx
       values = values * channels.size if values.size == 1
       raise ArgumentError, "expected #{channels.size} values" unless values.size == channels.size
       values.zip(self.class.channels).each do |value, key| # preserve order!
-        self.channels[key] = value
+        universe[channels[key]] = value
       end
     end
 

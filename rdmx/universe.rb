@@ -14,6 +14,10 @@ module Rdmx
       self.fixtures = FixtureArray.new self, fixture_class
     end
 
+    def [] index
+      @values[index]
+    end
+
     def []= channel, *new_values
       new_values.flatten!
       new_values = new_values * ([values[channel]].flatten.size / new_values.size) # extrapolate a pattern

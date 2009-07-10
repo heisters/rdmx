@@ -28,7 +28,7 @@ describe Rdmx::Fixture do
     end
 
     it "should have an accessor for all channels" do
-      @fixture.all.should == [0, 1, 2]
+      @fixture.all.should == @universe
       @fixture.all = *%w(r g b)
       @fixture.all.should == %w(r g b)
     end
@@ -42,6 +42,11 @@ describe Rdmx::Fixture do
     it "should apply one value to all channels" do
       @fixture.all = 'foo'
       @fixture.all.should == %w(foo) * 3
+    end
+
+    it "should write to the universe" do
+      @fixture.all = 100
+      @universe[0..2].should == [100, 100, 100]
     end
   end
 
