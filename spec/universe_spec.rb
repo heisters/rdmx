@@ -50,6 +50,13 @@ describe Rdmx::Universe do
             @universe[10] = 255
           end
         end
+
+        describe "patterns" do
+          it "should pad the beginning of the message and repeat the pattern" do
+            expect_write_with [0, 0, 128, 255, 128, 255]
+            @universe[2..5] = 128, 255
+          end
+        end
       end
     end
   end
