@@ -56,6 +56,10 @@ module Rdmx
       @values_delta = nil
     end
 
+    def inspect
+      "#<#{self.class}:#{dmx.device_name} #{values.inspect}>"
+    end
+
     class FixtureArray < Array
       attr_accessor :universe
 

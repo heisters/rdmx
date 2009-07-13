@@ -2,14 +2,17 @@ require 'serialport'
 
 module Rdmx
   class Dmx
-    attr_accessor :port
+    attr_accessor :port, :device_name
+    DEFAULT_PARAMS = {
+      'baud' => 57600,
+      'data_bits' => 8,
+      'stop_bits' => 2,
+      'parity' => SerialPort::NONE
+    }
 
     def initialize port
-      self.port = SerialPort.new port,
-        'baud' => 57600,
-        'data_bits' => 8,
-        'stop_bits' => 2,
-        'parity' => SerialPort::NONE
+      self.device_name = port
+      self.port = SerialPort.new device_name, DEFAULT_PARAMS
     end
 
     def write *data
