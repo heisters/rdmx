@@ -22,19 +22,9 @@ module Rdmx
       new_values.flatten!
       new_values = new_values * ([values[channel]].flatten.size / new_values.size) # extrapolate a pattern
 
-      self.update_values_delta channel, new_values
-      flush_buffer!
-    end
-
-    def update_values_delta channel, new_values
-      @values_delta ||= values.dup
       index = channel.respond_to?(:last) ? [channel].flatten : [channel, new_values.size]
-      @values_delta[*index] = new_values
-    end
-
-    def values_delta
-      last_changed = @values_delta.zip(values).rindex{|new, old|new != old} or return
-      @values_delta[0..last_changed]
+      self.values[*index] = new_values
+      flush_buffer!
     end
 
     # Build up writes and only write once
@@ -50,10 +40,7 @@ module Rdmx
 
     def flush_buffer!
       return if buffering?
-      vd = values_delta or return
-      dmx.write vd
-      self.values[0...vd.size] = vd
-      @values_delta = nil
+      dmx.write values
     end
 
     def inspect

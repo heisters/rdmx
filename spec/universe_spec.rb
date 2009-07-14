@@ -55,9 +55,9 @@ describe Rdmx::Universe do
 
     describe "controlling" do
       it "should buffer writes and only write once" do
-        packet = Rdmx::Dmx.packetize(1, 255).join
+        packet = Rdmx::Dmx.packetize(*([1, 255] + ([0] * (Rdmx::Universe::NUM_CHANNELS - 2)))).join
         @port.should_receive(:write).once.with(packet)
-        packet = Rdmx::Dmx.packetize(1).join
+        packet = Rdmx::Dmx.packetize(*([1] + ([0] * (Rdmx::Universe::NUM_CHANNELS - 1)))).join
         @port.should_not_receive(:write).with(packet)
 
         @universe.buffer do
@@ -81,21 +81,21 @@ describe Rdmx::Universe do
 
         describe "one" do
           it "should pad the beginning of the message" do
-            expect_write_with [0, 0, 255]
+            expect_write_with([0, 0, 255] + ([0] * (Rdmx::Universe::NUM_CHANNELS - 3)))
             @universe[2] = 255
           end
 
           it "should use old values for padding" do
             expect_write_with [1] * Rdmx::Universe::NUM_CHANNELS
             @universe[0..-1] = 1
-            expect_write_with(([1] * 10) + [255])
+            expect_write_with(([1] * 10) + [255] + ([1] * (Rdmx::Universe::NUM_CHANNELS - 11)))
             @universe[10] = 255
           end
         end
 
         describe "patterns" do
           it "should pad the beginning of the message and repeat the pattern" do
-            expect_write_with [0, 0, 128, 255, 128, 255]
+            expect_write_with [0, 0, 128, 255, 128, 255] + ([0] * (Rdmx::Universe::NUM_CHANNELS - 6))
             @universe[2..5] = 128, 255
           end
         end
