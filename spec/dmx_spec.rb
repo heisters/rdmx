@@ -4,7 +4,7 @@ describe Rdmx::Dmx do
   describe "initialization" do
     it "should initialize a serial port object on the given device" do
       SerialPort.should_receive(:new).with('/tmp/test',
-        {'baud' => 57600, 'data_bits' => 8, 'stop_bits' => 2, 'parity' => SerialPort::NONE})
+        {'baud' => 250000, 'data_bits' => 8, 'stop_bits' => 2, 'parity' => SerialPort::NONE})
       Rdmx::Dmx.new('/tmp/test')
     end
   end

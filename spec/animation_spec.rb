@@ -10,7 +10,8 @@ describe Rdmx::Animation do
 
   describe "a simple blink" do
     before :each do
-      @blink = Rdmx::Animation.new @universe do
+      universe = @universe # closure
+      @blink = Rdmx::Animation.new do
         5.times do
           universe[0..-1] = 0; sleep 1
           universe[0..-1] = 255; sleep 1
@@ -26,7 +27,8 @@ describe Rdmx::Animation do
 
   describe "a simple ramp" do
     before :each do
-      @fade = Rdmx::Animation.new @universe do
+      universe = @universe # closure
+      @fade = Rdmx::Animation.new do
         ramp 0..120, 10 do |value|
           universe.fixtures[0..1].each{|f|f.all = value}
         end
@@ -44,7 +46,7 @@ describe Rdmx::Animation do
 
     it "should execute the block based on the duration and the framerate" do
       @universe.fixtures[0..1].each do |f|
-        f.should_receive(:all=).exactly(10 * @universe.fps).times
+        f.should_receive(:all=).exactly(10 * Rdmx::Animation::FPS).times
       end
       @fade.go!
     end
@@ -57,7 +59,8 @@ describe Rdmx::Animation do
 
   describe "a negative ramp" do
     before :each do
-      @fade = Rdmx::Animation.new @universe do
+      universe = @universe # closure
+      @fade = Rdmx::Animation.new do
         ramp 120..0, 10 do |value|
           universe.fixtures[0..1].each{|f|f.all = value}
         end
@@ -75,7 +78,7 @@ describe Rdmx::Animation do
 
     it "should execute the block based on the duration and the framerate" do
       @universe.fixtures[0..1].each do |f|
-        f.should_receive(:all=).exactly(10 * @universe.fps).times
+        f.should_receive(:all=).exactly(10 * Rdmx::Animation::FPS).times
       end
       @fade.go!
     end

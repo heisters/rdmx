@@ -1,13 +1,11 @@
 module Rdmx
   class Universe
     NUM_CHANNELS = 512
-    DEFAULT_FPS = 25
 
-    attr_accessor :dmx, :values, :fixtures, :fps
+    attr_accessor :dmx, :values, :fixtures
 
     def initialize port, fixture_class=nil
       @buffer = false
-      self.fps = DEFAULT_FPS
       self.dmx = Rdmx::Dmx.new port
       self.values = Array.new NUM_CHANNELS
       self[0..-1] = 0 # set the universe to a known state
