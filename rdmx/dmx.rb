@@ -4,7 +4,7 @@ module Rdmx
   class Dmx
     attr_accessor :port, :device_name
     DEFAULT_PARAMS = {
-      'baud' => 250000,
+      'baud' => 230_400,
       'data_bits' => 8,
       'stop_bits' => 2,
       'parity' => SerialPort::NONE
