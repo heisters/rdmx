@@ -89,4 +89,26 @@ describe Rdmx::Animation do
     end
   end
 
+  describe "a float duration ramp" do
+    before :each do
+      universe = @universe # closure
+      @fade = Rdmx::Animation.new do
+        ramp 0..255, 0.5 do |value|
+          universe.fixtures[0..1].each{|f|f.all = value}
+        end
+      end
+      @fade.stub!(:sleep)
+    end
+
+    it "should not throw an error" do
+      lambda do
+        @fade.go!
+      end.should_not raise_error
+    end
+
+    it "should end with all fixtures at end" do
+      @fade.go!
+      @universe.fixtures[0..1].map{|f|f.all}.should == [[255, 255], [255, 255]]
+    end
+  end
 end
