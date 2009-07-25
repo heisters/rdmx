@@ -10,27 +10,38 @@ describe Rdmx::Animation do
 
   describe "a simple blink" do
     before :each do
-      universe = @universe # closure
       @blink = Rdmx::Animation.new do
         5.times do
-          universe[0..-1] = 0; sleep 1
-          universe[0..-1] = 255; sleep 1
+          frame{@universe[0..-1] = 0}
+          frame{@universe[0..-1] = 255}
         end
       end
     end
 
     it "should run the code 5 times" do
-      @blink.should_receive(:sleep).exactly(10).times.with(1)
+      @universe.should_receive(:[]=).exactly(10).times
       @blink.go!
+    end
+
+    it "should take 10 frames of time" do
+      @blink.should_receive(:sleep).exactly(10).times.with(Rdmx::Animation::FRAME_DURATION)
+      @blink.go!
+    end
+
+    it "should run things in the sequence expected" do
+      10.times do
+        @universe.should_receive(:[]=).exactly(1).times
+        @blink.should_receive(:sleep).exactly(1).times
+        @blink.go_once!
+      end
     end
   end
 
   describe "a simple ramp" do
     before :each do
-      universe = @universe # closure
       @fade = Rdmx::Animation.new do
         ramp 0..120, 10 do |value|
-          universe.fixtures[0..1].each{|f|f.all = value}
+          @universe.fixtures[0..1].each{|f|f.all = value}
         end
       end
       @fade.stub!(:sleep)
@@ -59,10 +70,9 @@ describe Rdmx::Animation do
 
   describe "a negative ramp" do
     before :each do
-      universe = @universe # closure
       @fade = Rdmx::Animation.new do
         ramp 120..0, 10 do |value|
-          universe.fixtures[0..1].each{|f|f.all = value}
+          @universe.fixtures[0..1].each{|f|f.all = value}
         end
       end
       @fade.stub!(:sleep)
@@ -91,10 +101,9 @@ describe Rdmx::Animation do
 
   describe "a float duration ramp" do
     before :each do
-      universe = @universe # closure
       @fade = Rdmx::Animation.new do
         ramp 0..255, 0.5 do |value|
-          universe.fixtures[0..1].each{|f|f.all = value}
+          @universe.fixtures[0..1].each{|f|f.all = value}
         end
       end
       @fade.stub!(:sleep)
@@ -109,6 +118,34 @@ describe Rdmx::Animation do
     it "should end with all fixtures at end" do
       @fade.go!
       @universe.fixtures[0..1].map{|f|f.all}.should == [[255, 255], [255, 255]]
+    end
+  end
+
+  describe "simultaneous animations" do
+    before :each do
+      @fixture = @universe.fixtures.first
+      @xfade = Rdmx::Animation.new do
+        frame do
+          ramp 0..255, 2.frames do |value|
+            @fixture.x = value
+          end
+          ramp 255..0, 2.frames do |value|
+            @fixture.y = value
+          end
+        end
+      end
+    end
+
+    it "should run the ramps simultaneously" do
+      @port.should_receive(:write).exactly(2).times
+      @fixture.x.should == 0
+      @fixture.y.should == 0
+      @xfade.go_once!
+      @fixture.x.should == 0
+      @fixture.y.should == 255
+      @xfade.go_once!
+      @fixture.x.should == 255
+      @fixture.y.should == 0
     end
   end
 end
