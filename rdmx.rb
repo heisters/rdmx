@@ -9,4 +9,5 @@ end
   rdmx/universe
   rdmx/fixture
   rdmx/animation
+  rdmx/layers
 ).each{|r|require File.dirname(__FILE__)+"/#{r}"}

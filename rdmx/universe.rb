@@ -17,18 +17,22 @@ module Rdmx
       self.class.universes << self
     end
 
-    def [] index
-      @values[index]
+    module Accessors
+      def [] index
+        self.values[index]
+      end
+
+      def []= channel, *new_values
+        new_values.flatten!
+        new_values = new_values * ([values[channel]].flatten.size / new_values.size) # extrapolate a pattern
+
+        index = channel.respond_to?(:last) ? [channel].flatten : [channel, new_values.size]
+        self.values[*index] = new_values
+        flush_buffer! if respond_to?(:flush_buffer!)
+      end
     end
 
-    def []= channel, *new_values
-      new_values.flatten!
-      new_values = new_values * ([values[channel]].flatten.size / new_values.size) # extrapolate a pattern
-
-      index = channel.respond_to?(:last) ? [channel].flatten : [channel, new_values.size]
-      self.values[*index] = new_values
-      flush_buffer!
-    end
+    include Accessors
 
     # Build up writes and only write once
     def buffer &writes
