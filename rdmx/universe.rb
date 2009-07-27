@@ -8,7 +8,7 @@ module Rdmx
     attr_accessor :dmx, :values, :fixtures
 
     def initialize port, fixture_class=nil
-      @buffer = false
+      @buffer = 0
       self.dmx = Rdmx::Dmx.new port
       self.values = Array.new NUM_CHANNELS
       self[0..-1] = 0 # set the universe to a known state
@@ -39,8 +39,8 @@ module Rdmx
       flush_buffer!
     end
 
-    def buffer_on!; @buffer = true; end
-    def buffer_off!; @buffer = false; end
+    def buffer_on!; @buffer += 1; end
+    def buffer_off!; @buffer -= 1; end
 
     def self.buffer &writes
       universes.each &:buffer_on!
@@ -49,7 +49,7 @@ module Rdmx
       universes.each{|u|u.buffer_off!; u.flush_buffer!}
     end
 
-    def buffering?; !!@buffer; end
+    def buffering?; @buffer > 0; end
 
     def flush_buffer!
       return if buffering?

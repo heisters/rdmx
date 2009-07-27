@@ -79,6 +79,20 @@ describe Rdmx::Universe do
         end
       end
 
+      it "should not flush the buffer prematurely on nested buffers" do
+        packet = Rdmx::Dmx.packetize(*([1, 255] + ([0] * (Rdmx::Universe::NUM_CHANNELS - 2)))).join
+        @port.should_receive(:write).once.with(packet)
+        packet = Rdmx::Dmx.packetize(*([1] + ([0] * (Rdmx::Universe::NUM_CHANNELS - 1)))).join
+        @port.should_not_receive(:write).with(packet)
+
+        @universe.buffer do
+          @universe.buffer do
+            @universe[0] = 1
+          end
+          @universe[1] = 255
+        end
+      end
+
       describe "values" do
         describe "all" do
           it "should write a simple value to every channel" do
