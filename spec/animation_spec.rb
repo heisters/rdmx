@@ -16,6 +16,7 @@ describe Rdmx::Animation do
           frame{@universe[0..-1] = 255}
         end
       end
+      @blink.stub!(:sleep)
     end
 
     it "should run the code 5 times" do
@@ -126,17 +127,18 @@ describe Rdmx::Animation do
       @fixture = @universe.fixtures.first
       @xfade = Rdmx::Animation.new do
         frame do
-          ramp 0..255, 2.frames do |value|
+          ramp 0..255, 4.frames do |value|
             @fixture.x = value
           end
-          ramp 255..0, 2.frames do |value|
+          ramp 255..0, 4.frames do |value|
             @fixture.y = value
           end
         end
       end
+      @xfade.stub!(:sleep)
     end
 
-    it "should run the ramps simultaneously" do
+    it "should run the ramps simultaneously in order" do
       @port.should_receive(:write).exactly(2).times
       @fixture.x.should == 0
       @fixture.y.should == 0
@@ -144,6 +146,24 @@ describe Rdmx::Animation do
       @fixture.x.should == 0
       @fixture.y.should == 255
       @xfade.go_once!
+      @fixture.x.should == 85
+      @fixture.y.should == 170
+      @xfade.go_once!
+      @fixture.x.should == 170
+      @fixture.y.should == 85
+      @xfade.go_once!
+      @fixture.x.should == 255
+      @fixture.y.should == 0
+    end
+
+    it "should be 4 frames" do
+      @fixture.should_receive(:x=).exactly(4).times
+      @fixture.should_receive(:y=).exactly(4).times
+      @xfade.go!
+    end
+
+    it "should end with all fixtures at end" do
+      @xfade.go!
       @fixture.x.should == 255
       @fixture.y.should == 0
     end
