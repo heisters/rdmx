@@ -69,6 +69,22 @@ describe Rdmx::Animation do
     end
   end
 
+  describe "a non-inclusive ramp" do
+    before :each do
+      @fade = Rdmx::Animation.new do
+        ramp 0...120, 10 do |value|
+          @universe.fixtures[0..1].each{|f|f.all = value}
+        end
+      end
+      @fade.stub!(:sleep)
+    end
+
+    it "should end with all fixtures one before end" do
+      @fade.go!
+      @universe.fixtures[0..1].map{|f|f.all}.should == [[119, 119], [119, 119]]
+    end
+  end
+
   describe "a negative ramp" do
     before :each do
       @fade = Rdmx::Animation.new do
