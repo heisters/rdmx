@@ -5,6 +5,8 @@ Rdmx is a simple Ruby library for talking DMX512-A over serial ports (or USB
 ports that look like serial ports) and a DSL for easily animating the DMX
 fixtures.
 
+Author: [Ian Smith-Heisters](http://idiosyncra.tc)
+
 Installation
 ------------
 
