@@ -96,25 +96,31 @@ module Rdmx
 
     def ramp range, duration, &step
       frame false do
-        duration = duration.to_f
-        start = range.min || range.begin
-        finish = range.max || range.end
-        value = start
-        distance = (finish.abs - start.abs).abs.to_f
-
-        loop do
-          step.call(value = value.round)
-          break if value == finish
-
-          # step_size must be calculated based on distance remaining because of
-          # the rounding errors caused by #round in the previous line
-          remaining_distance = distance - (start.abs.to_f - value.abs.to_f).abs.to_f
-          remaining_frames = [((duration -= FRAME_DURATION.to_f) * FPS.to_f), 1.0].max
-          delta = remaining_distance / remaining_frames
-          delta = -delta if start > finish
-
-          value += delta
+        timed_range(range, duration).each do |v|
+          step.(v)
           Fiber.yield
+        end
+      end
+    end
+
+    def timed_range range, duration
+      total_frames = duration * FPS
+      start = range.min || range.begin
+      finish = range.max || range.end
+      value = start
+      distance = (finish.abs - start.abs).abs
+
+      Enumerator.new do |yielder|
+        frame = 0
+        loop do
+          yielder.yield value.to_f.round
+          frame += 1
+          break if value == finish # this is a post-conditional loop
+
+          remaining_distance = distance - (start.abs - value.abs).abs
+          delta = Rational(remaining_distance, [(total_frames - frame), 1].max)
+          delta = -delta if start > finish
+          value += delta
         end
       end
     end

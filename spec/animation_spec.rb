@@ -41,7 +41,7 @@ describe Rdmx::Animation do
   describe "a simple ramp" do
     before :each do
       @fade = Rdmx::Animation.new do
-        ramp 0..120, 10 do |value|
+        ramp(0..120, 10) do |value|
           @universe.fixtures[0..1].each{|f|f.all = value}
         end
       end
@@ -67,12 +67,20 @@ describe Rdmx::Animation do
       @fade.go!
       @universe.fixtures[0..1].map{|f|f.all}.should == [[120, 120], [120, 120]]
     end
+
+    it "should run things in the sequence expected" do
+      (10 * Rdmx::Animation::FPS).times do
+        @universe.fixtures[0..1].each{|f|f.should_receive(:all=).exactly(1).times}
+        @fade.should_receive(:sleep).exactly(1).times
+        @fade.go_once!
+      end
+    end
   end
 
   describe "a non-inclusive ramp" do
     before :each do
       @fade = Rdmx::Animation.new do
-        ramp 0...120, 10 do |value|
+        ramp(0...120, 10) do |value|
           @universe.fixtures[0..1].each{|f|f.all = value}
         end
       end
@@ -85,10 +93,40 @@ describe Rdmx::Animation do
     end
   end
 
+  describe "a ramp with a small range and a larger duration" do
+    before :each do
+      @fade = Rdmx::Animation.new do
+        ramp(0..2, 4) do |value|
+          @universe.fixtures.first.all = value
+        end
+      end
+      @fade.stub!(:sleep)
+    end
+
+    it "should end with all fixtures at end" do
+      @fade.go!
+      @universe.fixtures.first.all.should == [2, 2]
+    end
+
+    it "should step up evenly" do
+      frames = 4 * Rdmx::Animation::FPS
+      values = (0..frames).to_a.map do |frame|
+        @fade.go_once!
+        @universe.fixtures.first.all
+      end
+      # The distribution is .25, .5, .25 due to rounding
+      [
+        values.select{|a|a == [0, 0]}.size,
+        values.select{|a|a == [1, 1]}.size,
+        values.select{|a|a == [2, 2]}.size
+      ].should == [(frames / 4), (frames / 2), (frames / 4) + 1]
+    end
+  end
+
   describe "a negative ramp" do
     before :each do
       @fade = Rdmx::Animation.new do
-        ramp 120..0, 10 do |value|
+        ramp(120..0, 10) do |value|
           @universe.fixtures[0..1].each{|f|f.all = value}
         end
       end
@@ -119,7 +157,7 @@ describe Rdmx::Animation do
   describe "a float duration ramp" do
     before :each do
       @fade = Rdmx::Animation.new do
-        ramp 0..255, 0.5 do |value|
+        ramp(0..255, 0.5) do |value|
           @universe.fixtures[0..1].each{|f|f.all = value}
         end
       end
@@ -143,10 +181,10 @@ describe Rdmx::Animation do
       @fixture = @universe.fixtures.first
       @xfade = Rdmx::Animation.new do
         frame do
-          ramp 0..255, 4.frames do |value|
+          ramp(0..255, 4.frames) do |value|
             @fixture.x = value
           end
-          ramp 255..0, 4.frames do |value|
+          ramp(255..0, 4.frames) do |value|
             @fixture.y = value
           end
         end
