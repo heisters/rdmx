@@ -27,6 +27,10 @@ module Rdmx
       end
     end
 
+    def inspect
+      "#<#{self.class} #{channels.inspect}>"
+    end
+
     class << self
       def channels; @channels; end
       def channels= *names

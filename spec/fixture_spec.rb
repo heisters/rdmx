@@ -48,6 +48,14 @@ describe Rdmx::Fixture do
       @fixture.all = 100
       @universe[0..2].should == [100, 100, 100]
     end
+
+    it "should have a useful inspect" do
+      class ::TestFixture < Rdmx::Fixture
+        self.channels = :r, :g, :b
+      end
+      @fixture = TestFixture.new @universe, 0, 1, 2
+      @fixture.inspect.should == "#<TestFixture {:r=>0, :g=>1, :b=>2}>"
+    end
   end
 
   describe "initializing" do
