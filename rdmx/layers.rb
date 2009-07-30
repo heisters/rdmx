@@ -24,10 +24,12 @@ module Rdmx
   class Layer
     include Rdmx::Universe::Accessors
 
-    attr_accessor :values
+    attr_accessor :values, :fixtures
 
     def initialize parent
       self.values = parent.universe.values.clone
+      self.fixtures = Rdmx::Universe::FixtureArray.new self,
+        parent.universe.fixture_class
     end
   end
 end

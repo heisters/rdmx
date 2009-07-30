@@ -5,34 +5,18 @@ module Rdmx
       attr_accessor :universes
     end
 
-    attr_accessor :dmx, :values, :fixtures
+    attr_accessor :dmx, :values, :fixtures, :fixture_class
 
     def initialize port, fixture_class=nil
       @buffer = 0
       self.dmx = Rdmx::Dmx.new port
       self.values = Array.new NUM_CHANNELS
       self[0..-1] = 0 # set the universe to a known state
+      self.fixture_class = fixture_class
       self.fixtures = FixtureArray.new self, fixture_class
       self.class.universes ||= []
       self.class.universes << self
     end
-
-    module Accessors
-      def [] index
-        self.values[index]
-      end
-
-      def []= channel, *new_values
-        new_values.flatten!
-        new_values = new_values * ([values[channel]].flatten.size / new_values.size) # extrapolate a pattern
-
-        index = channel.respond_to?(:last) ? [channel].flatten : [channel, new_values.size]
-        self.values[*index] = new_values
-        flush_buffer! if respond_to?(:flush_buffer!)
-      end
-    end
-
-    include Accessors
 
     # Build up writes and only write once
     def buffer &writes
@@ -63,6 +47,23 @@ module Rdmx
     def inspect
       "#<#{self.class}:#{dmx.device_name} #{values.inspect}>"
     end
+
+    module Accessors
+      def [] index
+        self.values[index]
+      end
+
+      def []= channel, *new_values
+        new_values.flatten!
+        new_values = new_values * ([values[channel]].flatten.size / new_values.size) # extrapolate a pattern
+
+        index = channel.respond_to?(:last) ? [channel].flatten : [channel, new_values.size]
+        self.values[*index] = new_values
+        flush_buffer! if respond_to?(:flush_buffer!)
+      end
+    end
+
+    include Accessors
 
     class FixtureArray < Array
       attr_accessor :universe

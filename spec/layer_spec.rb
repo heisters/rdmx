@@ -22,17 +22,22 @@ describe Rdmx::Layers do
     @universe.values.should == (([255, 255, 0] * (Rdmx::Universe::NUM_CHANNELS / 3)) + [0, 0])
   end
 
-  it "will not blend higher than 255" do
+  it "should not blend higher than 255" do
     @layers[0][0] = 255
     @layers[1][0] = 1
     @layers.apply!
     @universe.values[0].should == 255
   end
 
-  it "will not blend lower than 0" do
+  it "should not blend lower than 0" do
     @layers[0][0] = 1
     @layers[1][0] = -3
     @layers.apply!
     @universe.values[0].should == 0
+  end
+
+  it "should provide a fixtures interface" do
+    @layers[0].fixtures[0].all = 255
+    @layers[0][0..-1].should == [255, 255, 255] + ([0] * (Rdmx::Universe::NUM_CHANNELS - 3))
   end
 end
