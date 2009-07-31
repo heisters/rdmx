@@ -38,37 +38,46 @@ Example
     @universe = Universe.new('/dev/tty.usbserial-ENRVOTH6', Led => 50)
 
     blink = Animation.new do
-      puts "blinking red and green, then green and blue"
-      100.times do
-        frame{@universe[0..-1] = 255, 255, 0}
-        frame{@universe[0..-1] = 0, 120, 255}
+      frame.new do
+        puts "blinking red and green, then green and blue"
+        100.times do
+          @u.first[0..-1] = 255, 255, 0; continue
+          @u.first[0..-1] = 0, 120, 255; continue
+        end
       end
     end
 
     fade = Animation.new do
-      puts "fading in blue"
-      ramp(0..255, 10){|v|@universe[0..-1] = 0, 0, v}
+      frame.new do
+        puts "fading in blue"
+        timed_range(0..255, 10).each{|v|@u.first[0..-1] = 0, 0, v; continue}
+      end
     end
 
     xfade = Animation.new do
-      puts "cross-fading red and blue"
-      frame do
-        ramp(255..0, 10) do |v|
-          @universe.fixtures.each{|f|f.red = v}
+      frame.new do
+        puts "cross-fading red and blue"
+        timed_range(255..0, 10).each do |v|
+          @u.first.fixtures.each{|f|f.red = v}
+          continue
         end
-        ramp(0..255, 10) do |v|
-          @universe.fixtures.each{|f|f.blue = v}
+        timed_range(0..255, 10).each do |v|
+          @u.first.fixtures.each{|f|f.blue = v}
+          continue
         end
       end
     end
 
+    ll = Layers.new 2, @u.first
     layers = Animation.new do
-      puts "foreground/background blending with green fading in"
-      layers = Layers.new 2, @universe
-      ramp(0..255, 10) do |v|
-        layers[0][0..-1] = 255, 0, 255
-        layers[1][0..-1] = 255, v, 255
-        layers.apply!
+      frame.new do
+        puts "foreground/background blending with green fading in"
+        timed_range(0..255, 10).each do |v|
+          ll.first[0..-1] = 255, 0, 255
+          ll.last[0..-1] = 255, v, 255
+          ll.apply!
+          continue
+        end
       end
     end
 

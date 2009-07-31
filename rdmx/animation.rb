@@ -12,16 +12,19 @@ module Rdmx
       self.storyboard = storyboard
       self.root_frame = Frame.new do
         storyboard.call
+        Frame.yield
+
         loop do
-          root_frame.children.each do |frame|
-            Rdmx::Universe.buffer do
-              frame.resume if frame.alive? || frame.children.any?(&:alive?)
+          Rdmx::Universe.buffer do
+            root_frame.children.each do |frame|
+              frame.resume if frame.alive? || frame.all_children.any?(&:alive?)
             end
-            Fiber.yield sleep(FRAME_DURATION)
           end
+          Frame.yield sleep(FRAME_DURATION)
           break unless root_frame.all_children.any?(&:alive?)
         end
       end
+      go_once! # prime it by setting up the storyboard
     end
 
     def storyboard_receiver
@@ -68,20 +71,15 @@ module Rdmx
       end
     end
 
-    def frame insert_yield=true, &frame
-      Frame.new(
-        Frame.current,
-        &(insert_yield ? lambda{Fiber.yield frame.call} : frame)
-      )
-    end
-
     class Frame < Fiber
       attr_accessor :parent, :children
-      def initialize parent=nil, &block
+      def initialize &block
         super(&block)
         self.children = []
-        self.parent = parent
-        parent.children << self if parent
+        if Frame.current.respond_to?(:children)
+          self.parent = Frame.current
+          parent.children << self
+        end
       end
 
       def resume *args
@@ -94,13 +92,12 @@ module Rdmx
       end
     end
 
-    def ramp range, duration, &step
-      frame false do
-        timed_range(range, duration).each do |v|
-          step.(v)
-          Fiber.yield
-        end
-      end
+    def frame
+      Frame
+    end
+
+    def continue
+      frame.yield
     end
 
     def timed_range range, duration
