@@ -61,6 +61,8 @@ Example
           @u.first.fixtures.each{|f|f.red = v}
           continue
         end
+
+      frame.new do
         timed_range(0..255, 10).each do |v|
           @u.first.fixtures.each{|f|f.blue = v}
           continue
