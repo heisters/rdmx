@@ -257,4 +257,63 @@ describe Rdmx::Animation do
       @fixture.y.should == 0
     end
   end
+
+  describe "nested frames" do
+    before :each do
+      @fixture = @universe.fixtures.first
+      @xfade = Animation.new do
+        frame.new do
+          frame.new do
+            timed_range(0..255, 4.frames).each do |value|
+              @fixture.x = value
+              continue
+            end
+          end
+          frame.new do
+            timed_range(255..0, 4.frames).each do |value|
+              @fixture.y = value
+              continue
+            end
+          end
+        end
+      end
+      @xfade.stub!(:sleep)
+    end
+
+    it "should end with all fixtures at end" do
+      @xfade.go!
+      @fixture.x.should == 255
+      @fixture.y.should == 0
+    end
+
+    it "should be 4 frames" do
+      @fixture.should_receive(:x=).exactly(4).times
+      @fixture.should_receive(:y=).exactly(4).times
+      @xfade.should_receive(:sleep).exactly(4).times
+      @xfade.go!
+    end
+
+    it "should have 1 frame on the root" do
+      @xfade.root_frame.should have(1).children
+      @xfade.root_frame.should have(3).all_children
+    end
+
+    it "should run the ramps simultaneously in order" do
+      @port.should_receive(:write).exactly(4).times
+      @fixture.x.should == 0
+      @fixture.y.should == 0
+      @xfade.go_once!
+      @fixture.x.should == 0
+      @fixture.y.should == 255
+      @xfade.go_once!
+      @fixture.x.should == 85
+      @fixture.y.should == 170
+      @xfade.go_once!
+      @fixture.x.should == 170
+      @fixture.y.should == 85
+      @xfade.go_once!
+      @fixture.x.should == 255
+      @fixture.y.should == 0
+    end
+  end
 end
