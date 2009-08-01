@@ -119,7 +119,7 @@ class Range
     start = min || self.begin
     finish = max || self.end
     value = start
-    distance = (finish.abs - start.abs).abs
+    distance = (finish - start).abs
 
     Enumerator.new do |yielder|
       frame = 0
@@ -128,7 +128,7 @@ class Range
         frame += 1
         break if value == finish # this is a post-conditional loop
 
-        remaining_distance = distance - (start.abs - value.abs).abs
+        remaining_distance = distance - (start - value).abs
         delta = Rational(remaining_distance, [(total_frames - frame), 1].max)
         delta = -delta if start > finish
         value += delta

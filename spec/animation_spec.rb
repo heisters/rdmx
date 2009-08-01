@@ -322,9 +322,21 @@ describe Range do
   describe "over" do
 
     it "should go from 0 to 9" do
-      e = (0...10).over(1.second)
-      e.to_a.first.should == 0
-      e.to_a.last.should == 9
+      a = (0...10).over(1.second).to_a
+      a.first.should == 0
+      a.last.should == 9
+    end
+
+    it "should work with a negative range" do
+      a = (-2..2).over(1.second).to_a
+      a.first.should == -2
+      a.last.should == 2
+    end
+
+    it "should work with a descending range" do
+      a = (2..-2).over(1.second).to_a
+      a.first.should == 2
+      a.last.should == -2
     end
   end
 end
