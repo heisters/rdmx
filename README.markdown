@@ -50,21 +50,21 @@ Example
     fade = Animation.new do
       frame.new do
         puts "fading in blue"
-        timed_range(0..255, 10).each{|v|@u.first[0..-1] = 0, 0, v; continue}
+        (0..255).over(10.seconds).each{|v|@u.first[0..-1] = 0, 0, v.to_f.round; continue}
       end
     end
 
     xfade = Animation.new do
       frame.new do
         puts "cross-fading red and blue"
-        timed_range(255..0, 10).each do |v|
-          @u.first.fixtures.each{|f|f.red = v}
+        (255..0).over(10.seconds).each do |v|
+          @u.first.fixtures.each{|f|f.red = v.to_f.round}
           continue
         end
 
       frame.new do
-        timed_range(0..255, 10).each do |v|
-          @u.first.fixtures.each{|f|f.blue = v}
+        (0..255).over(10.seconds).each do |v|
+          @u.first.fixtures.each{|f|f.blue = v.to_f.round}
           continue
         end
       end
@@ -74,9 +74,9 @@ Example
     layers = Animation.new do
       frame.new do
         puts "foreground/background blending with green fading in"
-        timed_range(0..255, 10).each do |v|
+        (0..255).over(10.seconds).each do |v|
           ll.first[0..-1] = 255, 0, 255
-          ll.last[0..-1] = 255, v, 255
+          ll.last[0..-1] = 255, v.to_f.round, 255
           ll.apply!
           continue
         end

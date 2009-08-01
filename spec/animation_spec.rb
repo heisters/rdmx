@@ -53,8 +53,8 @@ describe Rdmx::Animation do
     before :each do
       @fade = Animation.new do
         frame.new do
-          timed_range(0..120, 10).each do |value|
-            @universe.fixtures[0..1].each{|f|f.all = value}
+          (0..120).over(10.seconds).each do |value|
+            @universe.fixtures[0..1].each{|f|f.all = value.to_f.round}
             continue
           end
         end
@@ -94,9 +94,9 @@ describe Rdmx::Animation do
   describe "a non-inclusive ramp" do
     before :each do
       @fade = Animation.new do
-        timed_range(0...120, 10).each do |value|
+        (0...120).over(10).each do |value|
           frame.new do
-            @universe.fixtures[0..1].each{|f|f.all = value}
+            @universe.fixtures[0..1].each{|f|f.all = value.to_f.round}
             continue
           end
         end
@@ -114,8 +114,8 @@ describe Rdmx::Animation do
     before :each do
       @fade = Animation.new do
         frame.new do
-          timed_range(0..2, 4).each do |value|
-            @universe.fixtures.first.all = value
+          (0..2).over(4).each do |value|
+            @universe.fixtures.first.all = value.to_f.round
             continue
           end
         end
@@ -146,9 +146,9 @@ describe Rdmx::Animation do
   describe "a negative ramp" do
     before :each do
       @fade = Animation.new do
-        timed_range(120..0, 10).each do |value|
+        (120..0).over(10).each do |value|
           frame.new do
-            @universe.fixtures[0..1].each{|f|f.all = value}
+            @universe.fixtures[0..1].each{|f|f.all = value.to_f.round}
             continue
           end
         end
@@ -180,9 +180,9 @@ describe Rdmx::Animation do
   describe "a float duration ramp" do
     before :each do
       @fade = Animation.new do
-        timed_range(0..255, 0.5).each do |value|
+        (0..255).over(0.5).each do |value|
           frame.new do
-            @universe.fixtures[0..1].each{|f|f.all = value}
+            @universe.fixtures[0..1].each{|f|f.all = value.to_f.round}
             continue
           end
         end
@@ -207,14 +207,14 @@ describe Rdmx::Animation do
       @fixture = @universe.fixtures.first
       @xfade = Animation.new do
         frame.new do
-          timed_range(0..255, 4.frames).each do |value|
-            @fixture.x = value
+          (0..255).over(4.frames).each do |value|
+            @fixture.x = value.to_f.round
             continue
           end
         end
         frame.new do
-          timed_range(255..0, 4.frames).each do |value|
-            @fixture.y = value
+          (255..0).over(4.frames).each do |value|
+            @fixture.y = value.to_f.round
             continue
           end
         end
@@ -264,14 +264,14 @@ describe Rdmx::Animation do
       @xfade = Animation.new do
         frame.new do
           frame.new do
-            timed_range(0..255, 4.frames).each do |value|
-              @fixture.x = value
+            (0..255).over(4.frames).each do |value|
+              @fixture.x = value.to_f.round
               continue
             end
           end
           frame.new do
-            timed_range(255..0, 4.frames).each do |value|
-              @fixture.y = value
+            (255..0).over(4.frames).each do |value|
+              @fixture.y = value.to_f.round
               continue
             end
           end
@@ -315,5 +315,38 @@ describe Rdmx::Animation do
       @fixture.x.should == 255
       @fixture.y.should == 0
     end
+  end
+end
+
+describe Range do
+  describe "over" do
+
+    it "should go from 0 to 9" do
+      e = (0...10).over(1.second)
+      e.to_a.first.should == 0
+      e.to_a.last.should == 9
+    end
+  end
+end
+
+describe Numeric do
+  before :each do
+    @num = 10
+  end
+
+  it "should convert to frames" do
+    @num.frames.should == Rdmx::Animation::FRAME_DURATION * 10.0
+  end
+
+  it "should convert to minutes" do
+    @num.minutes.should == 600
+  end
+
+  it "should convert to milliseconds" do
+    @num.milliseconds.should == 0.01
+  end
+
+  it "should assume everything is in seconds" do
+    @num.seconds.should == @num
   end
 end
