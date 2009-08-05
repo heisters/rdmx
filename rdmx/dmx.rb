@@ -19,6 +19,10 @@ module Rdmx
       @port.write self.class.packetize(*data.flatten).join
     end
 
+    def read
+      self.class.depacketize @port.read
+    end
+
     class << self
       def packetize *data
         size = data.size + 1 # add one for the start code
@@ -30,6 +34,10 @@ module Rdmx
         packet << "\x00" # start code
         packet += data.map{|d|d.respond_to?(:chr) ? d.chr : d}
         packet << "\xE7"
+      end
+
+      def depacketize string
+        string.bytes.to_a[5..-2]
       end
     end
   end
