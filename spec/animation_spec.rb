@@ -323,7 +323,6 @@ end
 
 describe Range do
   describe "over" do
-
     it "should go from 0 to 9" do
       a = (0...10).over(1.second).to_a
       a.first.should == 0
@@ -340,6 +339,18 @@ describe Range do
       a = (2..-2).over(1.second).to_a
       a.first.should == 2
       a.last.should == -2
+    end
+
+    it "should be rewindable" do
+      pending "Can't figure out how to do this"
+      e = (0..10).over(1.second)
+      begin
+        loop{e.next}
+      rescue StopIteration
+      end
+      lambda do
+        e.next.should == 0
+      end.should_not raise_error
     end
   end
 end
