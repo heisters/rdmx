@@ -36,13 +36,13 @@ module Rdmx
     end
 
     def mixin!
-      @storyboard_old_method_missing = storyboard_receiver.method :method_missing
+      @storyboard_old_method_missing = somm = storyboard_receiver.method(:method_missing)
       dsl = self
       storyboard_metaclass.send :define_method, :method_missing do |m, *a, &b|
         if dsl.respond_to?(m)
           dsl.send m, *a, &b
         else
-          @storyboard_old_method_missing.call m, *a, &b
+          somm.call m, *a, &b
         end
       end
     end

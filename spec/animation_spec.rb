@@ -10,6 +10,39 @@ describe Rdmx::Animation do
     @universe = Universe.new '/tmp/test', @fixture_class
   end
 
+  describe "DSL mixin" do
+    it "should delegate to DSL methods" do
+      klass = Class.new(Animation) do
+        def foo; end
+      end
+      a = klass.new{foo}
+      lambda do
+        a.go!
+      end.should_not raise_error
+    end
+
+    it "should delegate to default receiver methods" do
+      stub!(:foo)
+      a = Animation.new{foo}
+      lambda do
+        a.go!
+      end.should_not raise_error
+    end
+
+    it "should not persist the mixed-in DSL" do
+      klass = Class.new(Animation) do
+        def foo; end
+      end
+      a = klass.new{foo}
+      lambda do
+        a.go!
+      end.should_not raise_error
+      lambda do
+        foo
+      end.should raise_error
+    end
+  end
+
   describe "a simple blink" do
     before :each do
       @blink = Animation.new do
