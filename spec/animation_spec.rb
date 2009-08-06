@@ -295,6 +295,9 @@ describe Rdmx::Animation do
 
     it "should have 1 frame on the root" do
       @xfade.root_frame.should have(1).children
+      @xfade.root_frame.should have(1).all_children
+      @xfade.go_once! # the other children aren't added until the root is run
+      @xfade.root_frame.should have(1).children
       @xfade.root_frame.should have(3).all_children
     end
 
