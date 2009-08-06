@@ -40,4 +40,24 @@ describe Rdmx::Layers do
     @layers[0].fixtures[0].all = 255
     @layers[0][0..-1].should == [255, 255, 255] + ([0] * (Rdmx::Universe::NUM_CHANNELS - 3))
   end
+
+  it "should be easy to add one new layer" do
+    @layers.push
+    @layers.should have(3).items
+    @layers[0][0..-1] = 255, 0, 0
+    @layers[1][0..-1] = 0, 255, 0
+    @layers[2][0..-1] = 0, 0, 255
+    @layers.apply!
+    @universe.values.should == (([255, 255, 255] * (Rdmx::Universe::NUM_CHANNELS / 3)) + [0, 0])
+  end
+
+  it "should be easy to add n new layers" do
+    @layers.push 10
+    @layers.should have(12).items
+    @layers[0][0..-1] = 255, 0, 0
+    @layers[1][0..-1] = 0, 255, 0
+    @layers[11][0..-1] = 0, 0, 255
+    @layers.apply!
+    @universe.values.should == (([255, 255, 255] * (Rdmx::Universe::NUM_CHANNELS / 3)) + [0, 0])
+  end
 end

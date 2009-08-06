@@ -19,6 +19,14 @@ module Rdmx
         blended
       end
     end
+
+    def push *obj
+      if obj.empty? || (obj.size == 1 && obj.first.is_a?(Integer))
+        num = obj.pop || 1
+        obj = num.times.map{Rdmx::Layer.new(self)}
+      end
+      super(*obj)
+    end
   end
 
   class Layer
