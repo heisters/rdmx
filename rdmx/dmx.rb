@@ -23,17 +23,22 @@ module Rdmx
       self.class.depacketize @port.read
     end
 
+    SOM   = "\x7E" # start of message
+    LABEL = "\x06" # output only send dmx label
+    START = "\x00" # start code
+    EOM   = "\xE7" # end of message
+
     class << self
       def packetize *data
         size = data.size + 1 # add one for the start code
         packet = []
-        packet << "\x7E" # start of message
-        packet << "\x06" # output only send dmx label
+        packet << SOM
+        packet << LABEL
         packet << (size & 255).chr
         packet << ((size >> 8) & 255).chr
-        packet << "\x00" # start code
+        packet << START
         packet += data.map{|d|d.respond_to?(:chr) ? d.chr : d}
-        packet << "\xE7"
+        packet << EOM
       end
 
       def depacketize string
