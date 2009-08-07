@@ -103,6 +103,18 @@ module Rdmx
 end
 
 class Range
+  def start
+    min || self.begin
+  end
+
+  def finish
+    max || self.end
+  end
+
+  def distance
+    (finish - start).abs
+  end
+
   # Breaks a range over a number of steps equal to the number of animation
   # frames contained in the specified seconds. To avoid rounding errors, the
   # values are yielded as Rational numbers, rather than as integers or floats.
@@ -116,10 +128,7 @@ class Range
   #  (20..0).over(0.1).to_a # => [20, (140/9), (100/9), (20/3), (20/9), (0/1)]
   def over seconds
     total_frames = seconds * Rdmx::Animation::FPS
-    start = min || self.begin
-    finish = max || self.end
     value = start
-    distance = (finish - start).abs
 
     Enumerator.new do |yielder|
       frame = 0
