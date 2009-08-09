@@ -8,14 +8,14 @@ module Rdmx
 
     public :sleep
 
-    def initialize &storyboard
+    def initialize universe_class=Rdmx::Universe, &storyboard
       self.storyboard = storyboard
       self.root_frame = Frame.new do
         storyboard.call
         Frame.yield
 
         loop do
-          Rdmx::Universe.buffer do
+          universe_class.buffer do
             root_frame.children.each do |frame|
               frame.resume if frame.alive? || frame.all_children.any?(&:alive?)
             end
