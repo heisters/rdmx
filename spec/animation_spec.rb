@@ -105,7 +105,7 @@ describe Rdmx::Animation do
 
     it "should execute the block based on the duration and the framerate" do
       @universe.fixtures[0..1].each do |f|
-        f.should_receive(:all=).exactly((10 * Animation::FPS).to_i + 1).times
+        f.should_receive(:all=).exactly(10 * Animation::FPS).times
       end
       @fade.go!
     end
@@ -116,7 +116,7 @@ describe Rdmx::Animation do
     end
 
     it "should run things in the sequence expected" do
-      (10 * Animation::FPS).to_i.times do
+      (10 * Animation::FPS).times do
         @universe.fixtures[0..1].each{|f|f.should_receive(:all=).exactly(1).times}
         @fade.should_receive(:sleep).exactly(1).times
         @fade.go_once!
@@ -162,7 +162,7 @@ describe Rdmx::Animation do
     end
 
     it "should step up evenly" do
-      frames = (4 * Animation::FPS).to_i
+      frames = 4 * Animation::FPS
       values = (0..frames).to_a.map do |frame|
         @fade.go_once!
         @universe.fixtures.first.all
@@ -172,7 +172,7 @@ describe Rdmx::Animation do
         values.select{|a|a == [0, 0]}.size,
         values.select{|a|a == [1, 1]}.size,
         values.select{|a|a == [2, 2]}.size
-      ].should == [(frames / 4) + 1, (frames / 2), (frames / 4) + 1]
+      ].should == [(frames / 4), (frames / 2), (frames / 4) + 1]
     end
   end
 
@@ -199,7 +199,7 @@ describe Rdmx::Animation do
 
     it "should execute the block based on the duration and the framerate" do
       @universe.fixtures[0..1].each do |f|
-        f.should_receive(:all=).exactly((10 * Animation::FPS).to_i + 1).times
+        f.should_receive(:all=).exactly(10 * Animation::FPS).times
       end
       @fade.go!
     end
@@ -394,7 +394,7 @@ describe Numeric do
   end
 
   it "should convert to frames" do
-    @num.frames.should == 10 / Rdmx::Animation::FPS
+    @num.frames.should == Rdmx::Animation::FRAME_DURATION * 10.0
   end
 
   it "should convert to minutes" do

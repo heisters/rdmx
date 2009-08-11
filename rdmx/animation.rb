@@ -3,8 +3,8 @@ module Rdmx
   class Animation
     attr_accessor :storyboard, :root_frame
 
-    FPS = Rational(Rdmx::Dmx::DEFAULT_PARAMS['baud'], (8 * (Rdmx::Universe::NUM_CHANNELS + 6)))
-    FRAME_DURATION = Rational(1, FPS)
+    FPS = Rdmx::Dmx::DEFAULT_PARAMS['baud'] / (8 * (Rdmx::Universe::NUM_CHANNELS + 6))
+    FRAME_DURATION = 1.0 / FPS
 
     public :sleep
 
@@ -149,7 +149,7 @@ end
 # Extensions for Numeric that assume the number operated upon is in seconds.
 class Numeric
   def frames
-    self * Rdmx::Animation::FRAME_DURATION
+    to_f * Rdmx::Animation::FRAME_DURATION
   end
   alias_method :frame, :frames
 
@@ -164,7 +164,7 @@ class Numeric
   alias_method :second, :seconds
 
   def milliseconds
-    self / 1000.0
+    to_f / 1000.0
   end
   alias_method :ms, :milliseconds
 end
