@@ -20,10 +20,12 @@ module Rdmx
 
     # Build up writes and only write once
     def buffer &writes
-      buffer_on!
-      writes.call
-    ensure
-      buffer_off!
+      begin
+        buffer_on!
+        writes.call
+      ensure
+        buffer_off!
+      end
       flush_buffer!
     end
 
@@ -31,10 +33,13 @@ module Rdmx
     def buffer_off!; @buffer -= 1; end
 
     def self.buffer &writes
-      universes.each &:buffer_on!
-      writes.call
-    ensure
-      universes.each{|u|u.buffer_off!; u.flush_buffer!}
+      begin
+        universes.each &:buffer_on!
+        writes.call
+      ensure
+        universes.each &:buffer_off!
+      end
+      universes.each &:flush_buffer!
     end
 
     def buffering?; @buffer > 0; end
