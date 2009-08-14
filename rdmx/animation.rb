@@ -3,8 +3,23 @@ module Rdmx
   class Animation
     attr_accessor :storyboard, :root_frame
 
-    FPS = Rdmx::Dmx::DEFAULT_PARAMS['baud'] / (8 * (Rdmx::Universe::NUM_CHANNELS + 6))
-    FRAME_DURATION = 1.0 / FPS
+    class << self
+      def default_fps
+        Rdmx::Dmx::DEFAULT_PARAMS['baud'] / (8 * (Rdmx::Universe::NUM_CHANNELS + 6))
+      end
+
+      def fps
+        @fps ||= default_fps
+      end
+
+      def fps= new_fps
+        @fps = new_fps
+      end
+
+      def frame_duration
+        1.0 / fps
+      end
+    end
 
     public :sleep
 
@@ -20,7 +35,7 @@ module Rdmx
               frame.resume if frame.alive? || frame.all_children.any?(&:alive?)
             end
           end
-          Frame.yield sleep(FRAME_DURATION)
+          Frame.yield sleep(self.class.frame_duration)
           break unless root_frame.all_children.any?(&:alive?)
         end
       end
@@ -127,7 +142,7 @@ class Range
   #  (0..10).over(1).to_a # => [0, (5/27), (10/27), (5/9), (20/27)... (10/1)]
   #  (20..0).over(0.1).to_a # => [20, (140/9), (100/9), (20/3), (20/9), (0/1)]
   def over seconds
-    total_frames = seconds * Rdmx::Animation::FPS
+    total_frames = seconds * Rdmx::Animation.fps
     value = start
 
     Enumerator.new do |yielder|
@@ -149,7 +164,7 @@ end
 # Extensions for Numeric that assume the number operated upon is in seconds.
 class Numeric
   def frames
-    to_f * Rdmx::Animation::FRAME_DURATION
+    to_f * Rdmx::Animation.frame_duration
   end
   alias_method :frame, :frames
 
