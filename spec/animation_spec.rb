@@ -69,7 +69,7 @@ describe Rdmx::Animation do
     end
 
     it "should take 10 frames of time" do
-      @blink.should_receive(:sleep).exactly(10).times.with(Animation.frame_duration)
+      @blink.should_receive(:sleep).exactly(10).times
       @blink.go!
     end
 
@@ -79,6 +79,39 @@ describe Rdmx::Animation do
         @blink.should_receive(:sleep).exactly(1).times
         @blink.go_once!
       end
+    end
+
+    it "should sleep less time if the animation is slow" do
+      t = Time.now
+      slow = ((Animation.frame_duration / 1.5) * 100000.0).round / 100000.0
+      Time.should_receive(:now).and_return(t, t + slow)
+      @blink.should_receive(:sleep).with(Animation.frame_duration - slow)
+      @blink.go_once!
+    end
+
+    it "should not sleep at all if the animation is really slow" do
+      t = Time.now
+      slow = ((Animation.frame_duration * 2) * 100000.0).round / 100000.0
+      Time.should_receive(:now).and_return(t, t + slow)
+      @blink.should_receive(:sleep).with(0)
+      @blink.go_once!
+    end
+
+    it "should report the elapsed time" do
+      t = Time.now
+      slow = ((Animation.frame_duration * 2) * 100000.0).round / 100000.0
+      Time.should_receive(:now).and_return(t, t + slow)
+      @blink.go_once!
+      ((@blink.timing.last * 100000.0).round / 100000.0).should == slow
+    end
+
+    it "should report a running average of frame elapsed time" do
+      t = Time.now
+      slow = ((Animation.frame_duration * 2) * 100000.0).round / 100000.0
+      Time.should_receive(:now).and_return(*([t, t + slow] * 5))
+      5.times{@blink.go_once!}
+      ((@blink.timing.average * 100000.0).round / 100000.0).should == slow
+      @blink.timing.should have(5).items
     end
   end
 

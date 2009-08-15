@@ -2,6 +2,7 @@ require 'fiber'
 module Rdmx
   class Animation
     attr_accessor :storyboard, :root_frame
+    attr_reader :timing
 
     class << self
       def default_fps
@@ -25,17 +26,26 @@ module Rdmx
 
     def initialize universe_class=Rdmx::Universe, &storyboard
       self.storyboard = storyboard
+      @timing = Timing.new
       self.root_frame = Frame.new do
+        # priming
         storyboard.call
         Frame.yield
 
+        # running
         loop do
+          start = Time.now
           universe_class.buffer do
             root_frame.children.each do |frame|
               frame.resume if frame.alive? || frame.all_children.any?(&:alive?)
             end
           end
-          Frame.yield sleep(self.class.frame_duration)
+
+          elapsed = Time.now - start
+          @timing.push elapsed
+          sleep_for = [self.class.frame_duration - elapsed, 0].max
+
+          Frame.yield sleep(sleep_for)
           break unless root_frame.all_children.any?(&:alive?)
         end
       end
@@ -105,6 +115,21 @@ module Rdmx
       def all_children
         (children + children.map(&:all_children)).flatten
       end
+    end
+
+    class Timing < Array
+      attr_reader :sum
+
+      def initialize; super; end # disable initialization arguments
+
+      def push elapsed
+        @sum ||= 0.0
+        @sum += elapsed
+        @sum -= shift if size == 50
+        super elapsed
+      end
+
+      def average; @sum / size; end
     end
 
     def frame
