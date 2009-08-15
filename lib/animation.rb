@@ -118,18 +118,18 @@ module Rdmx
     end
 
     class Timing < Array
-      attr_reader :sum
+      attr_reader :average
 
-      def initialize; super; end # disable initialization arguments
-
-      def push elapsed
-        @sum ||= 0.0
-        @sum += elapsed
-        @sum -= shift if size == 50
-        super elapsed
+      def initialize # disable initialization arguments
+        @sum = 0.0
+        super
       end
 
-      def average; @sum / size; end
+      def push elapsed
+        @sum += elapsed
+        @sum -= shift if size == 50
+        super(elapsed).tap{@average = @sum / size}
+      end
     end
 
     def frame
