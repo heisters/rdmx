@@ -3,6 +3,7 @@ require 'rubygems'
 module Rdmx; end
 
 %w(
+  core_ext
   dmx
   universe
   fixture
