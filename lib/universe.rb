@@ -2,7 +2,8 @@ module Rdmx
   class Universe
     NUM_CHANNELS = 512
     class << self
-      attr_accessor :universes
+      def all; @@all; end
+      def all= new; @@all = new; end
     end
 
     attr_accessor :dmx, :values, :fixtures, :fixture_class
@@ -14,8 +15,8 @@ module Rdmx
       self[0..-1] = 0 # set the universe to a known state
       self.fixture_class = fixture_class
       self.fixtures = FixtureArray.new self, fixture_class
-      self.class.universes ||= []
-      self.class.universes << self
+      self.class.all ||= []
+      self.class.all << self
     end
 
     # Build up writes and only write once
@@ -34,12 +35,12 @@ module Rdmx
 
     def self.buffer &writes
       begin
-        universes.each &:buffer_on!
+        all.each &:buffer_on!
         writes.call
       ensure
-        universes.each &:buffer_off!
+        all.each &:buffer_off!
       end
-      universes.each &:flush_buffer!
+      all.each &:flush_buffer!
     end
 
     def buffering?; @buffer > 0; end

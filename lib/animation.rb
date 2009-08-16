@@ -24,7 +24,7 @@ module Rdmx
 
     public :sleep
 
-    def initialize universe_class=Rdmx::Universe, &storyboard
+    def initialize &storyboard
       self.storyboard = storyboard
       @timing = Timing.new
       self.root_frame = Frame.new do
@@ -35,7 +35,7 @@ module Rdmx
         # running
         loop do
           start = Time.now
-          universe_class.buffer do
+          Rdmx::Universe.buffer do
             root_frame.children.each do |frame|
               frame.resume if frame.alive? || frame.all_children.any?(&:alive?)
             end

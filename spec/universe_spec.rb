@@ -77,6 +77,19 @@ describe Rdmx::Universe do
         end
       end
 
+      it "should buffer across classes" do
+        packet = Rdmx::Dmx.packetize(*([1, 255] + ([0] * (Rdmx::Universe::NUM_CHANNELS - 2)))).join
+        @port.should_receive(:write).once.with(packet)
+        packet = Rdmx::Dmx.packetize(*([1] + ([0] * (Rdmx::Universe::NUM_CHANNELS - 1)))).join
+        @port.should_not_receive(:write).with(packet)
+        universe2 = Class.new(Rdmx::Universe).new('/tmp/test')
+        universe2.stub!(:flush_buffer!)
+        universe2.class.buffer do
+          @universe[0] = 1
+          @universe[1] = 255
+        end
+      end
+
       it "should not flush the buffer prematurely on nested buffers" do
         packet = Rdmx::Dmx.packetize(*([1, 255] + ([0] * (Rdmx::Universe::NUM_CHANNELS - 2)))).join
         @port.should_receive(:write).once.with(packet)
