@@ -25,6 +25,9 @@ describe Rdmx::Fixture do
       @fixture.red.should == 0
       @fixture.green.should == 1
       @fixture.blue.should == 2
+      @universe[0].should == 0
+      @universe[1].should == 1
+      @universe[2].should == 2
     end
 
     it "should have an accessor for all channels" do

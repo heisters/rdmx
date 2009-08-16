@@ -4,9 +4,10 @@ module Rdmx
 
     def initialize universe, *addresses
       self.universe = universe
-      self.channels = {}
       raise ArgumentError, "expected #{self.class.channels.size} addresses" unless
         self.class.channels.size == addresses.size
+
+      self.channels = {}
       self.class.channels.zip(addresses).each do |name, address|
         self.channels[name] = address
       end
@@ -14,7 +15,7 @@ module Rdmx
 
     def all
       self.class.channels.map do |key| # preserve order!
-        universe[channels[key]]
+        self.send key
       end
     end
 
@@ -23,7 +24,7 @@ module Rdmx
       values = values * channels.size if values.size == 1
       raise ArgumentError, "expected #{channels.size} values" unless values.size == channels.size
       values.zip(self.class.channels).each do |value, key| # preserve order!
-        universe[channels[key]] = value
+        self.send "#{key}=", value
       end
     end
 
@@ -32,18 +33,21 @@ module Rdmx
     end
 
     class << self
-      def channels; @channels; end
+      attr_reader :channels
       def channels= *names
         @channels = names.flatten
+        # use eval instead of define_method, since closures are slow
+        # see http://olabini.com/blog/2008/05/dynamically-created-methods-in-ruby/
+        @channels.each do |name|
+          class_eval <<-EVAL
+            def #{name}
+              universe[channels[#{name.inspect}]]
+            end
 
-        channels.each do |name|
-          define_method "#{name}" do
-            universe[channels[name]]
-          end
-
-          define_method "#{name}=" do |value|
-            universe[channels[name]] = value
-          end
+            def #{name}= value
+              universe[channels[#{name.inspect}]] = value
+            end
+          EVAL
         end
       end
     end
