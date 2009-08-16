@@ -2,8 +2,8 @@ module Rdmx
   class Universe
     NUM_CHANNELS = 512
     class << self
-      def all; @@all; end
-      def all= new; @@all = new; end
+      def all; @@all ||= []; end
+      def all= new; all; @@all = new; end
     end
 
     attr_accessor :dmx, :values, :fixtures, :fixture_class
@@ -15,7 +15,6 @@ module Rdmx
       self[0..-1] = 0 # set the universe to a known state
       self.fixture_class = fixture_class
       self.fixtures = FixtureArray.new self, fixture_class
-      self.class.all ||= []
       self.class.all << self
     end
 
