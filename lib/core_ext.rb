@@ -23,7 +23,7 @@ class Range
   #  (0..10).over(1).to_a # => [0, (5/27), (10/27), (5/9), (20/27)... (10/1)]
   #  (20..0).over(0.1).to_a # => [20, (140/9), (100/9), (20/3), (20/9), (0/1)]
   def over seconds
-    total_frames = seconds * Rdmx::Animation.fps
+    total_frames = seconds.to_frames
     value = start
 
     Enumerator.new do |yielder|
@@ -42,27 +42,40 @@ class Range
   end
 end
 
-# Extensions for Numeric that assume the number operated upon is in seconds.
 class Numeric
+  # Assume the current number is frames, and convert it to an equivalent
+  # number of seconds.
   def frames
     to_f * Rdmx::Animation.frame_duration
   end
   alias_method :frame, :frames
 
+  # Assume the current number is minutes, and convert it to an equivalent
+  # number of seconds.
   def minutes
     self * 60
   end
   alias_method :minute, :minutes
 
+  # Assume the current number is seconds, and convert it to an equivalent
+  # number of seconds. Ie. do nothing.
   def seconds
     self
   end
   alias_method :second, :seconds
 
+  # Assume the current number is milliseconds, and convert it to an equivalent
+  # number of seconds.
   def milliseconds
     to_f / 1000.0
   end
   alias_method :ms, :milliseconds
+
+  # Assume the current number is seconds, and convert it to an equivalent
+  # number of frames.
+  def to_frames
+    self * Rdmx::Animation.fps
+  end
 end
 
 class Fifo < Array
