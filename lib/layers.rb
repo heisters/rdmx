@@ -7,6 +7,19 @@ module Rdmx
       super(count){|i|Rdmx::Layer.new(self)}
     end
 
+    def apply!
+      universe.values = blend
+    end
+
+    def blend
+      inject(Array.new(universe.values.size, 0)) do |blended, layer|
+        layer.values.each_index do |i|
+          blended[i] = [([(blended[i] + layer[i]), 255].min), 0].max
+        end
+        blended
+      end
+    end
+
     def push *obj
       if obj.empty? || (obj.size == 1 && obj.first.is_a?(Integer))
         num = obj.pop || 1
@@ -17,26 +30,15 @@ module Rdmx
   end
 
   class Layer
+    include Rdmx::Universe::Accessors
 
     attr_accessor :values, :fixtures, :parent
 
     def initialize parent
       self.parent = parent
-      self.values = parent.universe.values
+      self.values = Array.new parent.universe.values.size, 0
       self.fixtures = Rdmx::Universe::FixtureArray.new self,
         parent.universe.fixture_class
     end
-
-    def update_channel channel, *new_values
-      new_values = extrapolate_pattern channel, new_values
-      index = coerce_index channel, new_values.size
-      blended = values[*index].each_with_index.map do |v, i|
-        new_value = new_values[i]
-        new_value ? [[v + new_values[i], 255].min, 0].max : v
-      end
-      self.values[*index] = blended
-    end
-
-    include Rdmx::Universe::Accessors # after redefinition so alias works
   end
 end
