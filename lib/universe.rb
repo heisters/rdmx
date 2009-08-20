@@ -54,15 +54,28 @@ module Rdmx
     end
 
     module Accessors
+      def self.included base
+        base.send :alias_method, :[]=, :update_channel
+      end
+
       def [] index
         self.values[index]
       end
 
-      def []= channel, *new_values
-        new_values.flatten!
-        new_values = new_values * ([values[channel]].flatten.size / new_values.size) # extrapolate a pattern
+      private
+      def coerce_index index, new_values_size
+        index.respond_to?(:last) ? [index].flatten : [index, new_values_size]
+      end
 
-        index = channel.respond_to?(:last) ? [channel].flatten : [channel, new_values.size]
+      def extrapolate_pattern channel, new_values
+        new_values.flatten!
+        new_values * ([values[channel]].flatten.size / new_values.size)
+      end
+      public
+
+      def update_channel channel, *new_values
+        new_values = extrapolate_pattern channel, new_values
+        index = coerce_index channel, new_values.size
         self.values[*index] = new_values
         flush_buffer! if respond_to?(:flush_buffer!)
       end
