@@ -418,6 +418,11 @@ describe Range do
         e.next.should == 0
       end.should_not raise_error
     end
+
+    it "should work with very small fractional ramps" do
+      a = (0.01..0.001).over(100.seconds).to_a
+      a.should have(5500).items
+    end
   end
 end
 

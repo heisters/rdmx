@@ -24,6 +24,9 @@ class Range
   #  (20..0).over(0.1).to_a # => [20, (140/9), (100/9), (20/3), (20/9), (0/1)]
   def over seconds
     total_frames = seconds.to_frames
+    finish = self.finish.to_r
+    start = self.start.to_r
+    distance = (finish - start).abs
     value = start
 
     Enumerator.new do |yielder|
