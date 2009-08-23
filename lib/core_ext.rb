@@ -79,6 +79,16 @@ class Numeric
   def to_frames
     self * Rdmx::Animation.fps
   end
+
+  # Enumerable#min is slow.
+  def lesser_of other
+    other < self ? other : self
+  end
+
+  # Enumerable#max is slow.
+  def greater_of other
+    other > self ? other : self
+  end
 end
 
 class Fifo < Array

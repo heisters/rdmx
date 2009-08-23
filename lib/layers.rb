@@ -1,3 +1,4 @@
+require 'narray'
 module Rdmx
   class Layers < Array
     attr_accessor :universe
@@ -8,16 +9,16 @@ module Rdmx
     end
 
     def apply!
-      universe.values = blend
+      universe.values.replace blend
     end
 
     def blend
-      inject(Array.new(universe.values.size, 0)) do |blended, layer|
-        layer.values.each_index do |i|
-          blended[i] = [([(blended[i] + layer[i]), 255].min), 0].max
-        end
-        blended
+      blend = inject(NArray.int(universe.values.size)) do |blended, layer|
+        blended + layer.values
       end
+      blend[blend.gt 255] = 255
+      blend[blend.lt 0] = 0
+      blend.to_a
     end
 
     def push *obj
@@ -30,15 +31,21 @@ module Rdmx
   end
 
   class Layer
-    include Rdmx::Universe::Accessors
-
     attr_accessor :values, :fixtures, :parent
 
     def initialize parent
       self.parent = parent
-      self.values = Array.new parent.universe.values.size, 0
+      self.values = NArray.int parent.universe.values.size
       self.fixtures = Rdmx::Universe::FixtureArray.new self,
         parent.universe.fixture_class
+    end
+
+    def [] *args
+      values.send :[], *args
+    end
+
+    def []= *args
+      values.send :[]=, *args
     end
   end
 end
