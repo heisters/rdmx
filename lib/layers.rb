@@ -55,7 +55,7 @@ module Rdmx
       composite = reverse.inject(NArray.float(universe.values.size), &compositor)
       composite[composite.gt 255] = 255
       composite[composite.lt 0] = 0
-      composite.to_a
+      composite.to_i.to_a
     end
 
     def push *obj
