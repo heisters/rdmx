@@ -14,6 +14,7 @@ class Range
   # Breaks a range over a number of steps equal to the number of animation
   # frames contained in the specified seconds. To avoid rounding errors, the
   # values are yielded as Rational numbers, rather than as integers or floats.
+  #
   # It differs from #step in that:
   # * the beginning and end of the range are guarranteed to be returned, even
   #   if the size of the steps needs to be munged
@@ -30,14 +31,12 @@ class Range
     value = start
 
     Enumerator.new do |yielder|
-      frame = 0
       loop do
         yielder.yield value
-        frame += 1
         break if value == finish # this is a post-conditional loop
 
         remaining_distance = distance - (start - value).abs
-        delta = Rational(remaining_distance, [(total_frames - frame), 1].max)
+        delta = Rational(remaining_distance, (total_frames -= 1).greater_of(1))
         delta = -delta if start > finish
         value += delta
       end
