@@ -1,12 +1,11 @@
 require 'narray'
 module Rdmx
   class Layers < Array
-    attr_accessor :universe
-    attr_reader :use_alpha
+    attr_accessor :universe, :compositor
 
     def initialize count, universe
       self.universe = universe
-      @use_alpha = false
+      self.compositor = :addition
       super(count){|i|Rdmx::Layer.new(self)}
     end
 
@@ -14,17 +13,13 @@ module Rdmx
       universe.values.replace composite
     end
 
-    def alpha_on!
-      @use_alpha = true
+    def composite_base
+      NArray.float(universe.values.size)
     end
 
-    def alpha_off!
-      @use_alpha = false
-    end
-
-    def self.alpha_compositor
+    def alpha_compositor
       last = nil
-      lambda do |composite, layer|
+      reverse.inject(composite_base) do |composite, layer|
         alpha = layer.alpha
         alpha -= last.alpha if last
         alpha = alpha.greater_of(0)
@@ -42,17 +37,27 @@ module Rdmx
       end
     end
 
-    def self.addition_compositor
-      lambda do |composite, layer|
+    def addition_compositor
+      inject(composite_base) do |composite, layer|
         composite + layer.values
       end
     end
 
+    def last_on_top_compositor
+      c = self[0...-1].inject(composite_base) do |composite, layer|
+        composite + layer.values
+      end
+      last = self[-1]
+      if last
+        mask = self[-1].values > 0
+        c[mask] = self[-1].values[mask]
+      end
+      c
+    end
+
     # See http://en.wikipedia.org/wiki/Alpha_compositing
     def composite
-      compositor = use_alpha ? :alpha : :addition
-      compositor = self.class.send "#{compositor}_compositor"
-      composite = reverse.inject(NArray.float(universe.values.size), &compositor)
+      composite = send "#{self.compositor}_compositor"
       composite[composite.gt 255] = 255
       composite[composite.lt 0] = 0
       composite.to_i.to_a
