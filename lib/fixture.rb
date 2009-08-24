@@ -19,12 +19,36 @@ module Rdmx
       end
     end
 
-    def all= *values
+    def expand_values values
       values.flatten!
       values = values * channels.size if values.size == 1
       raise ArgumentError, "expected #{channels.size} values" unless values.size == channels.size
+      values
+    end
+
+    def all= *values
+      values = expand_values values
       values.zip(self.class.channels).each do |value, key| # preserve order!
         self.send "#{key}=", value
+      end
+    end
+
+    def ensure_alpha_supported!
+      raise "Alpha is not supported by #{universe.inspect}" unless universe.respond_to?(:alpha)
+    end
+
+    def alpha
+      ensure_alpha_supported!
+      self.class.channels.map do |key|
+        universe.alpha[channels[key]]
+      end
+    end
+
+    def alpha= *values
+      ensure_alpha_supported!
+      values = expand_values values
+      values.zip(self.class.channels).each do |value, key|
+        universe.alpha[channels[key]] = value
       end
     end
 

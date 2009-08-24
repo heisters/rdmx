@@ -65,6 +65,7 @@ module Rdmx
       self.parent = parent
       self.values = NArray.float parent.universe.values.size
       self.alpha = NArray.float parent.universe.values.size
+      self.alpha[] = 1.0
       self.fixtures = Rdmx::Universe::FixtureArray.new self,
         parent.universe.fixture_class
     end

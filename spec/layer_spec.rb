@@ -101,7 +101,8 @@ describe Rdmx::Layers do
 
     it "should mask where the layer has no values" do
       @layers[0].alpha[true] = 0.75
-      @layers[1].alpha[0] = 1.00
+      @layers[1].alpha[0] = 1.0
+      @layers[1].alpha[1] = 0
       @layers[0][0..1] = 100
       @layers[1][0] = 100
       @layers.apply!
