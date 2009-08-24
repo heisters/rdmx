@@ -82,17 +82,17 @@ describe Rdmx::Layers do
     end
 
     it "blend according to alpha" do
-      @layers[0].alpha = 0.75
-      @layers[1].alpha = 0.25
+      @layers[0].alpha[true] = 0.75
+      @layers[1].alpha[true] = 0.25
       @layers[0][0] = 100
       @layers[1][0] = 100
       @layers.apply!
-      @universe.values.first.should == 75
+      @universe.values.first.should == 81
     end
 
     it "should not blend layers that are behind a 1.0 alpha layer" do
-      @layers[0].alpha = 0.75
-      @layers[1].alpha = 1.00
+      @layers[0].alpha[true] = 0.75
+      @layers[1].alpha[true] = 1.00
       @layers[0][0] = 100
       @layers[1][0] = 100
       @layers.apply!
@@ -100,12 +100,12 @@ describe Rdmx::Layers do
     end
 
     it "should mask where the layer has no values" do
-      @layers[0].alpha = 0.75
-      @layers[1].alpha = 1.00
+      @layers[0].alpha[true] = 0.75
+      @layers[1].alpha[0] = 1.00
       @layers[0][0..1] = 100
       @layers[1][0] = 100
       @layers.apply!
-      @universe.values[0..1].should == [100, 100]
+      @universe.values[0..1].should == [100, 75]
     end
   end
 

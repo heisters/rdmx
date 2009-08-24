@@ -17,23 +17,10 @@ module Rdmx
       NArray.float(universe.values.size)
     end
 
+    # See http://en.wikipedia.org/wiki/Alpha_compositing#Alpha_blending
     def alpha_compositor
-      last = nil
-      reverse.inject(composite_base) do |composite, layer|
-        alpha = layer.alpha
-        alpha -= last.alpha if last
-        alpha = alpha.greater_of(0)
-        masked = layer.values
-        if last
-          mask = last.values <= 0
-          masked = masked * alpha
-          masked[mask] = layer.values[mask]
-        else
-          masked *= alpha
-        end
-        composite += masked
-        last = layer
-        composite
+      inject(composite_base) do |composite, layer|
+        ((layer.alpha - 1).abs * composite) + (layer.alpha * layer.values)
       end
     end
 
@@ -55,7 +42,6 @@ module Rdmx
       c
     end
 
-    # See http://en.wikipedia.org/wiki/Alpha_compositing
     def composite
       composite = send "#{self.compositor}_compositor"
       composite[composite.gt 255] = 255
@@ -76,9 +62,9 @@ module Rdmx
     attr_accessor :values, :fixtures, :parent, :alpha
 
     def initialize parent
-      self.alpha = 1.0
       self.parent = parent
       self.values = NArray.float parent.universe.values.size
+      self.alpha = NArray.float parent.universe.values.size
       self.fixtures = Rdmx::Universe::FixtureArray.new self,
         parent.universe.fixture_class
     end
