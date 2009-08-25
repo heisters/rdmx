@@ -56,14 +56,6 @@ module Rdmx
       "#<#{self.class} #{channels.inspect}>"
     end
 
-    def calibrate name, value
-      modifier = self.class.calibrations[name]
-      case modifier
-      when Rational then value * modifier
-      else; value + modifier
-      end.round
-    end
-
     class << self
       attr_reader :channels
       def channels= *names
@@ -91,7 +83,7 @@ module Rdmx
             channels.include? name
           class_eval <<-EVAL
             def #{name}_with_calibration= value
-              self.#{name}_without_calibration = calibrate #{name.inspect}, value
+              self.#{name}_without_calibration = (value * self.class.calibrations[#{name.inspect}]).round
             end
             alias_method_chain #{name.inspect}=, :calibration
           EVAL

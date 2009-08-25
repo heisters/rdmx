@@ -81,7 +81,7 @@ describe Rdmx::Fixture do
     before :each do
       @class = Class.new(Rdmx::Fixture) do
         self.channels = :red, :green, :blue
-        calibrate :red => +10, :green => -10, :blue => Rational(2, 1)
+        calibrate :red => 1.1, :green => 0.9, :blue => 2
       end
 
       @universe = Rdmx::Universe.new '/tmp/test', @class
@@ -90,7 +90,7 @@ describe Rdmx::Fixture do
 
     it "should add the calibration to any values" do
       @fixture.all = 50, 60, 70
-      @fixture.all.should == [60, 50, 140]
+      @fixture.all.should == [55, 54, 140]
     end
   end
 
