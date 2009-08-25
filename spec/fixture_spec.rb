@@ -77,6 +77,23 @@ describe Rdmx::Fixture do
     end
   end
 
+  describe "color calibration" do
+    before :each do
+      @class = Class.new(Rdmx::Fixture) do
+        self.channels = :red, :green, :blue
+        calibrate :red => +10, :green => -10, :blue => Rational(2, 1)
+      end
+
+      @universe = Rdmx::Universe.new '/tmp/test', @class
+      @fixture = @class.new @universe, 0, 1, 2
+    end
+
+    it "should add the calibration to any values" do
+      @fixture.all = 50, 60, 70
+      @fixture.all.should == [60, 50, 140]
+    end
+  end
+
   describe "initializing" do
     it "should raise an error if you don't provide enough addresses" do
       lambda do

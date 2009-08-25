@@ -74,6 +74,30 @@ module Rdmx
           EVAL
         end
       end
+
+      attr_reader :calibrations
+      def calibrate calibrations
+        @calibrations = calibrations
+        calibrations.each do |name, modifier|
+          raise ArgumentError, "#{name.inspect} is not a valid channel" unless
+            channels.include? name
+          class_eval <<-EVAL
+            def #{name}_with_calibration= value
+              self.#{name}_without_calibration = calibrate #{name.inspect}, value
+            end
+            alias_method_chain #{name.inspect}=, :calibration
+          EVAL
+        end
+      end
+    end
+
+
+    def calibrate name, value
+      modifier = self.class.calibrations[name]
+      case modifier
+      when Rational then value * modifier
+      else; value + modifier
+      end
     end
   end
 end
