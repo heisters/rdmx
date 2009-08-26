@@ -1,6 +1,8 @@
 module Rdmx
   class Fixture
     attr_accessor :channels, :universe
+    alias_method :layer, :universe
+    alias_method :layer=, :universe
 
     def initialize universe, *addresses
       self.universe = universe
@@ -54,6 +56,11 @@ module Rdmx
 
     def inspect
       "#<#{self.class} #{channels.inspect}>"
+    end
+
+    def calibrate_layer
+      raise "Cannot calibrate #{layer.parent.inspect}" unless layer.parent.respond_to?(:calibrate)
+      layer.parent.calibrate *self.class.calibrations.values
     end
 
     class << self

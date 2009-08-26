@@ -92,6 +92,16 @@ describe Rdmx::Fixture do
       @fixture.all = 50, 60, 70
       @fixture.all.should == [55, 54, 140]
     end
+
+    it "should be easy to push calibrations to a layer" do
+      @layers = Rdmx::Layers.new 1, @universe
+      @layer = @layers.first
+      @fixture = @layer.fixtures.first
+      @fixture.calibrate_layer
+      @layer[0..2] = 50, 60, 70
+      @layers.composite!
+      @universe.values[0..2].should == [55, 54, 140]
+    end
   end
 
   describe "initializing" do
