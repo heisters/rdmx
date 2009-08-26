@@ -49,12 +49,20 @@ module Rdmx
       composite.to_i.to_a
     end
 
-    def push *obj
-      if obj.empty? || (obj.size == 1 && obj.first.is_a?(Integer))
-        num = obj.pop || 1
-        obj = num.times.map{Rdmx::Layer.new(self)}
+    def add_layer_args *args
+      if args.empty? || (args.size == 1 && args.first.is_a?(Integer))
+        num = args.pop || 1
+        args = num.times.map{Rdmx::Layer.new(self)}
       end
-      super(*obj)
+      args
+    end
+
+    def push *obj
+      super(*add_layer_args(*obj))
+    end
+
+    def unshift *obj
+      super(*add_layer_args(*obj))
     end
   end
 

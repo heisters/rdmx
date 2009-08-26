@@ -61,6 +61,11 @@ describe Rdmx::Layers do
     @universe.values.first.should == 6
   end
 
+  it "should be easy to add a layer to the bottom" do
+    @layers.unshift
+    @layers.should have(3).items
+  end
+
   it "should not copy values from the parent universe" do
     @universe[0..-1] = 100
     @layers.push
