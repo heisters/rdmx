@@ -114,19 +114,4 @@ describe Rdmx::Layers do
       @universe.values[0..1].should == [100, 75]
     end
   end
-
-  describe "with last on top" do
-    before :each do
-      @layers.compositor = :last_on_top
-    end
-
-    it "should blend everything normally, except the top" do
-      @layers.push
-      @layers[0][0..1] = 100
-      @layers[1][0..1] = 100
-      @layers[2][0] = 100
-      @layers.apply!
-      @universe.values[0..1].should == [100, 200]
-    end
-  end
 end

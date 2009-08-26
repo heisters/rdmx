@@ -30,18 +30,6 @@ module Rdmx
       end
     end
 
-    def last_on_top_compositor
-      c = self[0...-1].inject(composite_base) do |composite, layer|
-        composite + layer.values
-      end
-      last = self[-1]
-      if last
-        mask = self[-1].values > 0
-        c[mask] = self[-1].values[mask]
-      end
-      c
-    end
-
     def composite
       composite = send "#{self.compositor}_compositor"
       composite[composite.gt 255] = 255
