@@ -9,8 +9,14 @@ module Rdmx
       super(count){|i|Rdmx::Layer.new(self)}
     end
 
-    def apply!
+    def composite!
       universe.values.replace composite
+    end
+
+    def calibrate *calibrations
+      calibrations *= universe.values.size / calibrations.size
+      calibrations += calibrations[0...(universe.values.size % calibrations.size)]
+      @calibrations = NArray.to_na calibrations
     end
 
     def composite_base
@@ -32,6 +38,7 @@ module Rdmx
 
     def composite
       composite = send "#{self.compositor}_compositor"
+      composite *= @calibrations if @calibrations
       composite[composite.gt 255] = 255
       composite[composite.lt 0] = 0
       composite.to_i.to_a

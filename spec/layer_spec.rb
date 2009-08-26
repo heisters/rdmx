@@ -11,28 +11,28 @@ describe Rdmx::Layers do
 
   it "should be easy to wash the background" do
     @layers[0][true] = 255
-    @layers.apply!
+    @layers.composite!
     @universe.values.should == [255] * Rdmx::Universe::NUM_CHANNELS
   end
 
   it "should be easy to create a blend" do
     @layers[0][0] = 10
     @layers[1][0] = 5
-    @layers.apply!
+    @layers.composite!
     @universe.values.should == [15] + ([0] * (Rdmx::Universe::NUM_CHANNELS - 1))
   end
 
   it "should not blend higher than 255" do
     @layers[0][0] = 255
     @layers[1][0] = 1
-    @layers.apply!
+    @layers.composite!
     @universe.values[0].should == 255
   end
 
   it "should not blend lower than 0" do
     @layers[0][0] = 1
     @layers[1][0] = -3
-    @layers.apply!
+    @layers.composite!
     @universe.values[0].should == 0
   end
 
@@ -47,7 +47,7 @@ describe Rdmx::Layers do
     @layers[0][0] = 1
     @layers[1][0] = 2
     @layers[2][0] = 3
-    @layers.apply!
+    @layers.composite!
     @universe.values.first.should == 6
   end
 
@@ -57,7 +57,7 @@ describe Rdmx::Layers do
     @layers[0][0] = 1
     @layers[1][0] = 2
     @layers[11][0] = 3
-    @layers.apply!
+    @layers.composite!
     @universe.values.first.should == 6
   end
 
@@ -74,11 +74,23 @@ describe Rdmx::Layers do
 
   it "should not persist updates" do
     @layers[0][0] = 1
-    @layers.apply!
+    @layers.composite!
     @layers[0][0] = 0
     @layers[0][1] = 1
-    @layers.apply!
+    @layers.composite!
     @universe.values[0..1].should == [0, 1]
+  end
+
+  describe "calibration" do
+    before :each do
+      @layers.calibrate 0.1, 1.1, 0.9
+    end
+
+    it "should multiply all elements by the calibrations" do
+      @layers[0][0..2] = 100, 150, 200
+      @layers.composite!
+      @universe.values[0..2].should == [10, 165, 180]
+    end
   end
 
   describe "with alpha" do
@@ -91,7 +103,7 @@ describe Rdmx::Layers do
       @layers[1].alpha[true] = 0.25
       @layers[0][0] = 100
       @layers[1][0] = 100
-      @layers.apply!
+      @layers.composite!
       @universe.values.first.should == 81
     end
 
@@ -100,7 +112,7 @@ describe Rdmx::Layers do
       @layers[1].alpha[true] = 1.00
       @layers[0][0] = 100
       @layers[1][0] = 100
-      @layers.apply!
+      @layers.composite!
       @universe.values.first.should == 100
     end
 
@@ -110,7 +122,7 @@ describe Rdmx::Layers do
       @layers[1].alpha[1] = 0
       @layers[0][0..1] = 100
       @layers[1][0] = 100
-      @layers.apply!
+      @layers.composite!
       @universe.values[0..1].should == [100, 75]
     end
   end
