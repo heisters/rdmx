@@ -34,7 +34,7 @@ describe Range do
 
     it "should work with very small fractional ramps" do
       a = (0.01..0.001).over(100.seconds).to_a
-      a.should have(5500).items
+      a.should have(2700).items
     end
   end
 end
